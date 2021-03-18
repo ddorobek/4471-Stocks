@@ -6,6 +6,7 @@ const mysql = require('mysql');
 
 const app = express();
 const pubURL = 'http://localhost:3005'
+const config = require('./config.json')
 
 const subscriber = redis.createClient();
 //console.log(subscriber)
@@ -15,9 +16,9 @@ const wss = new WebSocket.Server({ port: 8080 });
 const channel = ["stock-listings", "stock-performance", "stock-compare"]
 
 const conCredentials = {
-    host: "stocks-database.cp0mxw253ygq.us-east-2.rds.amazonaws.com",
-    user: "admin",
-    password: "5tYtKvTwF4ZqsdgAmwaM"
+    host: config.host,
+    user: config.user,
+    password: config.password
 }
 
 wss.on('connection', function connection(ws) {
