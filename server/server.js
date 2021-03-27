@@ -27,11 +27,7 @@ wss.on('connection', function connection(ws) {
 
         console.log(message)
         if (message.message == "subscribe") {
-            channel.forEach(channel => {
-                if (message.channel == channel) {
-                    subscriber.subscribe(channel);
-                }
-            })
+            subscriber.subscribe(message.channel);
             
         } else {
             if (message.channel == channel[0]) {
@@ -43,7 +39,7 @@ wss.on('connection', function connection(ws) {
                     console.log("Connected to DB!");
 
                     con.query(query, function (err, result) {
-                        if (err) throw err;
+                        if (err) throw err; 
                         let tickers = Object.values(result).map(res => res.symbol)
                         message = { ...message, message: tickers }
                         //publisher.publish(channel[0], {message: 'sadsaddsad' });
@@ -72,7 +68,6 @@ wss.on('connection', function connection(ws) {
                         //console.log(stock)
                         message = { ...message, message: stock }
                         //publisher.publish(channel[0], {message: 'sadsaddsad' });
-                        console.log('publishing...')
                         publisher.publish(channel[1], JSON.stringify(message));
                         //ws.send((JSON.stringify({ channel: message.channel, message: message.message, status: 200 })))*/
                     });
@@ -84,23 +79,30 @@ wss.on('connection', function connection(ws) {
             }
             
         }
-        console.log('received: ', message.channel, message.message);
+
+       
+        
+        
+
     };
-
-    subscriber.on("message", (channel, message) => {
-        console.log('subscriber received message ... ', channel)
-        ws.send(message)
-
-        //returned data from publisher
+    // broadcast on web socket when receving a Redis PUB/SUB Event
+    subscriber.on('message', function (channel, message) {
+        console.log('subscriber sending message to ws...')
+        ws.send(message);
     })
-
-    subscriber.on('subscribe', function (channel, count) {
-        ws.send(JSON.stringify({ channel: channel, message: 'subscribed' }))
-        console.log('Subscribed to channel: ' + channel)
-    });
+    
 });
 
 
+
+subscriber.on('subscribe', function (channel, count) {
+
+    console.log('Subscribed to channel: ' + channel, ' ... sending back to client')
+    publisher.publish(channel, JSON.stringify({ channel: channel, message: 'subscribed' }))
+    //subscriber.message(JSON.stringify({ channel: channel, message: 'subscribed' }))
+    //ws.send(JSON.stringify({ channel: channel, message: 'subscribed' }))
+    //ws.close()
+});
 
 
 

@@ -6,10 +6,11 @@ import { TextField, Button, CircularProgress } from '@material-ui/core';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 
+const ws = new WebSocket("ws://localhost:8080/");
+
 
 function App() {
 
-    const ws = new WebSocket("ws://localhost:8080/");
     const channel = ["stock-listings", "stock-performance", "stock-compare"]
 
     const [subscribed, setSubscribed] = useState(false)
@@ -17,6 +18,7 @@ function App() {
     const [tickerValue, setTickerValue] = useState(null)
     const [stockDate, setStockDate] = useState('')
     const [stock, setStock] = useState(null)
+    const [connected, setConnected] = useState(false)
 
 
     /*ws.onmessage = (evt) => {
@@ -41,43 +43,36 @@ function App() {
         ws.onopen = () => {
             console.log('WebSocket Client Connected');
             ws.send(JSON.stringify({ channel: channel[0], message: 'subscribe' }))
-            ws.send(JSON.stringify({ channel: channel[1], message: 'subscribe' }))
-            ws.send(JSON.stringify({ channel: channel[2], message: 'subscribe' }))
+            //ws.send(JSON.stringify({ channel: channel[0], message: 'subscribe' }))
+            //s.close()
+            //ws.send(JSON.stringify({ channel: channel[1], message: 'subscribe' }))
+            //ws.send(JSON.stringify({ channel: channel[2], message: 'subscribe' }))
         };
 
         ws.onmessage = (evt) => {
             let message = JSON.parse(evt.data)
-            console.log(message)
-            if (message.channel == channel[2] && message.message == "subscribed") {
-                setSubscribed(true)
-                ws.close()
+            console.log('received message...',message)
+            if (message.channel == channel[0] && message.message == "subscribed") {
+                console.log('sending', { channel: channel[1], message: 'subscribe' })
+                ws.send(JSON.stringify({ channel: channel[1], message: 'subscribe' }))
             }
-            
+            else if (message.channel == channel[1] && message.message == "subscribed") {
+                console.log('sending', { channel: channel[2], message: 'subscribe' })
+                ws.send(JSON.stringify({ channel: channel[2], message: 'subscribe' }))
+            }
 
+            else if (message.channel == channel[2] && message.message == "subscribed") {
+                ws.send(JSON.stringify({ channel: channel[0], message: 'get' }))
+                setSubscribed(true)
+            }
+            else if (message.channel == channel[0] && message.message != "subscribe") {
+                setTickers(message.message)
+                //ws.send(JSON.stringify({ channel: channel[0], message: 'get' }))
+            }
         };
 
     }, []);
 
-    useEffect(() => {
-        if (subscribed) {
-            console.log('subscribed!')
-            let body = { channel: 'stock-listings', message: 'get' }
-            ws.onopen = () => {
-                ws.send(JSON.stringify(body)) 
-            };
-
-            ws.onmessage = (evt) => {
-                let message = JSON.parse(evt.data)
-                console.log(message)
-                if (message.channel == channel[0] && message.message != "subscribed") {
-                    setTickers(message.message)
-                    ws.close()
-                }
-
-            };
-        }
-        
-    }, [subscribed])
 
     const getStockInfo = () => {
         let body = {
@@ -136,26 +131,30 @@ function App() {
                         {stock == null
                             ? null
                             : <>
-                                <p>{tickerValue} Stock</p>
+                                <p>{tickerValue.toUpperCase()} Stock</p>
                                       <LineChart
-                                          width={500}
-                                          height={300}
+                                          title={tickerValue.toUpperCase()}
+                                          width={700}
+                                          height={400}
+                                          style={{backgroundColor: 'white'}}
                                           data={stock.message}
                                           margin={{
                                               top: 5,
-                                              right: 30,
-                                              left: 20,
+                                              right: 5,
+                                              left: 5,
                                               bottom: 5,
                                           }}
                                       >
-                                          <CartesianGrid strokeDasharray="3 3" />
-                                          <XAxis dataKey="price" />
-                                          <YAxis domain={['dataMin', 'dataMax']}/>
+                                          <CartesianGrid  />
+                                          <XAxis dataKey="time" domain={['dataMin', 'dataMax']} tick={{ fontSize: '12' }}/>
+                                          <YAxis dataKey="price" domain={['dataMin', 'dataMax']} tick={{ fontSize: '12' }}/>
                                           <Tooltip />
                                           <Legend />
-                                          <Line type="monotone" dataKey="price" stroke="#8884d8" activeDot={{ r: 8 }} />
+                                          <Line type="monotone" name="Price" dataKey="price" stroke="#8884d8" activeDot={{ r: 1 }} />
                                           {/*<Line type="monotone" dataKey="uv" stroke="#82ca9d" />*/}
                                       </LineChart>
+                                      <br />
+                                      <br />
                                 
                             </>
                         }
