@@ -38,16 +38,21 @@
 }
 
 .TextField {
-    background-color: white;
     width: 100%;
     margin-bottom: 3vh;
-
 }
 
 .Container {
     display: flex;
     justify-content: center;
-    width: 50%;
-    flex-flow: column;
+    width: 95vw;
     align-items: center;
+}
+
+.GraphContainer {
+    padding: 2vh 2vw;
+}
+
+.TrackerContainer {
+    padding: 2vh 2vw;
 }

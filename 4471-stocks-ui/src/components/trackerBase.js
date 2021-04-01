@@ -55,7 +55,7 @@ const TrackerBase = (props) => {
     }
 
     return (
-        <div>
+        <div className="TrackerContainer">
             <Autocomplete
                 className="TextField"
                 options={tickers}

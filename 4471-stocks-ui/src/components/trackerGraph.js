@@ -1,14 +1,16 @@
 import { useEffect, useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import '../App.css';
+
 
 
 const TrackerBase = (props) => {
     const { tickerValue, stock } = {...props }
     return (
-        <>
-            <p>{tickerValue.toUpperCase()} Stock</p>
+        <div className="GraphContainer">
+            <p>{tickerValue ? tickerValue.toUpperCase() : null} Stock</p>
             <LineChart
-                title={tickerValue.toUpperCase()}
+                title={tickerValue ? tickerValue.toUpperCase() : null}
                 width={700}
                 height={400}
                 style={{ backgroundColor: 'white' }}
@@ -28,10 +30,7 @@ const TrackerBase = (props) => {
                 <Line type="monotone" name="Price" dataKey="price" stroke="#8884d8" activeDot={{ r: 1 }} />
                 {/*<Line type="monotone" dataKey="uv" stroke="#82ca9d" />*/}
             </LineChart>
-            <br />
-            <br />
-
-        </>
+        </div>
     )
 }
 
