@@ -54,7 +54,19 @@ wss.on('connection', function connection(ws) {
                 
             }
             if (message.channel == channel[1]) {
-                query = 'SELECT * FROM Stocks.' + message.message.value + '_stock WHERE date = ' + message.message.date + ';'
+                let query
+                if (message.message.startDate == null) {
+                    //start date is null, get data from beginning of data to end date range
+                    query = 'SELECT * FROM Stocks.' + message.message.value + '_stock WHERE date <= ' + message.message.endDate + ';'
+                }
+                else if (message.message.endDate == null) {
+                    //end date is null, get data from end date to end of data
+                    query = 'SELECT * FROM Stocks.' + message.message.value + '_stock WHERE date >= ' + message.message.startDate + ';'
+                }
+                else {
+                    query = 'SELECT * FROM Stocks.' + message.message.value + '_stock WHERE date >= ' + message.message.startDate + ' AND date <= ' + message.message.endDate + ';'
+                }
+                console.log(query)
                 let con = mysql.createConnection(conCredentials);
 
                 con.connect(function (err) {
@@ -63,7 +75,7 @@ wss.on('connection', function connection(ws) {
 
                     con.query(query, function (err, result) {
                         if (err) throw err;
-                        let stock = Object.values(result).filter((res, i) => i % 25 == 0)
+                        let stock = Object.values(result).filter((res, i) => i % 130 == 0)
 
                         //console.log(stock)
                         message = { ...message, message: stock }
@@ -90,7 +102,12 @@ wss.on('connection', function connection(ws) {
         console.log('subscriber sending message to ws...')
         ws.send(message);
     })
-    
+
+    ws.onclose = () => {
+        console.log('closing')
+        ws.close()
+
+    }
 });
 
 
