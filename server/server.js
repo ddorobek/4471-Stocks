@@ -32,9 +32,6 @@ wss.on('connection', function connection(ws) {
         } else {
             if (message.channel == channel[0]) {
                 stockListingsService(message)
-
-                //get tickers from sql
-                
             }
             if (message.channel == channel[1]) {
                 stockPerformanceService(message)

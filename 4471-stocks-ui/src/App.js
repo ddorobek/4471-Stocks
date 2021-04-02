@@ -23,6 +23,8 @@ function App() {
     const [stock, setStock] = useState(null)
 
     const [openTracker, setOpenTracker] = useState(false)
+    const [openComparer, setOpenComparer] = useState(false)
+
 
     useEffect(() => {
         ws.onopen = () => {
@@ -60,8 +62,8 @@ function App() {
         console.log(startDate, endDate)
 
         let body = {
-            channel: channel[2],
-            message: { value: { first: tickerValue, second: 'wtsla' }, startDate: startDate, endDate: endDate}
+            channel: channel[1],
+            message: { value: tickerValue, startDate: startDate, endDate: endDate}
         }
         console.log(body)
         ws.send(JSON.stringify(body))
@@ -72,12 +74,16 @@ function App() {
     }
 
 
+
+
   return (
     <div className="App">
       <header className="App-header">
-        {openTracker ? null : <img src={logo} className="App-logo" alt="logo" />}
+        {openTracker || openComparer ? null : <img src={logo} className="App-logo" alt="logo" />}
         <h1>Stock Tracker</h1>
-        {openTracker ? null : <Button onClick={() => setOpenTracker(true)} disabled={!tickers} variant="contained" color="primary">Open</Button>}
+        {openTracker || openComparer ? null : <Button onClick={() => { setOpenTracker(true); setOpenComparer(false)}} disabled={!tickers} variant="contained" color="primary">Open</Button>}
+        {openTracker || openComparer ? null : <Button onClick={() => { setOpenComparer(true); setOpenTracker(false); }} disabled={!tickers} variant="contained" color="primary">Compare</Button>}
+
         <div className="Container">
             {
                 openTracker
