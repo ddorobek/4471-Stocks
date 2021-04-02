@@ -130,21 +130,21 @@ function stockPerformanceService(message) {
 function stockComparisonService(message) {
     let queryFirst
     let querySecond
-
+    console.log(message)
     if (message.message.startDate == null) {
         //start date is null, get data from beginning of data to end date range
-        queryFirst = 'SELECT * FROM Stocks.' + message.message.value.first + '_stock WHERE date <= ' + message.message.endDate + ';'
-        querySecond = 'SELECT * FROM Stocks.' + message.message.value.second + '_stock WHERE date <= ' + message.message.endDate + ';'
+        queryFirst = 'SELECT * FROM Stocks.' + message.message.value + '_stock WHERE date <= ' + message.message.endDate + ';'
+        querySecond = 'SELECT * FROM Stocks.' + message.message.compare + '_stock WHERE date <= ' + message.message.endDate + ';'
     }
     else if (message.message.endDate == null) {
         //end date is null, get data from end date to end of data
-        queryFirst = 'SELECT * FROM Stocks.' + message.message.value.first + '_stock WHERE date >= ' + message.message.startDate + ';'
-        querySecond = 'SELECT * FROM Stocks.' + message.message.value.second + '_stock WHERE date >= ' + message.message.startDate + ';'
+        queryFirst = 'SELECT * FROM Stocks.' + message.message.value + '_stock WHERE date >= ' + message.message.startDate + ';'
+        querySecond = 'SELECT * FROM Stocks.' + message.message.compare + '_stock WHERE date >= ' + message.message.startDate + ';'
 
     }
     else {
-        queryFirst = 'SELECT * FROM Stocks.' + message.message.value.first + '_stock WHERE date >= ' + message.message.startDate + ' AND date <= ' + message.message.endDate + ';'
-        querySecond = 'SELECT * FROM Stocks.' + message.message.value.second + '_stock WHERE date >= ' + message.message.startDate + ' AND date <= ' + message.message.endDate + ';'
+        queryFirst = 'SELECT * FROM Stocks.' + message.message.value + '_stock WHERE date >= ' + message.message.startDate + ' AND date <= ' + message.message.endDate + ';'
+        querySecond = 'SELECT * FROM Stocks.' + message.message.compare + '_stock WHERE date >= ' + message.message.startDate + ' AND date <= ' + message.message.endDate + ';'
     }
 
     let con = mysql.createConnection(conCredentials);
@@ -165,6 +165,8 @@ function stockComparisonService(message) {
                 message = { ...message, message: { firstStock: first, secondStock: second } }
                 //publisher.publish(channel[0], {message: 'sadsaddsad' });
                 publisher.publish(channel[1], JSON.stringify(message));
+                con.end()
+
                 //ws.send((JSON.stringify({ channel: message.channel, message: message.message, status: 200 })))*/
             });
             //console.log(stock)
@@ -175,7 +177,6 @@ function stockComparisonService(message) {
         });
 
         
-        con.end()
     });
 }
 

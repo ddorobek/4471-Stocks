@@ -20,7 +20,11 @@ function App() {
     const [subscribed, setSubscribed] = useState(false)
     const [tickers, setTickers] = useState(null)
     const [tickerValue, setTickerValue] = useState(null)
+    const [tickerCompareValue, setTickerCompareValue] = useState(null)
+
     const [stock, setStock] = useState(null)
+    const [stockCompare, setStockCompare] = useState(null)
+
 
     const [openTracker, setOpenTracker] = useState(false)
     const [openComparer, setOpenComparer] = useState(false)
@@ -59,21 +63,39 @@ function App() {
     const getStockInfo = (start, end) => {
         let startDate = start != '' ? start.replace(/\//g, "") : null
         let endDate = end != '' ? end.replace(/\//g, "") : null
-        console.log(startDate, endDate)
-
-        let body = {
-            channel: channel[1],
-            message: { value: tickerValue, startDate: startDate, endDate: endDate}
+        let body
+        if (openComparer) {
+            body = {
+                channel: channel[2],
+                message: { value: tickerValue, compare: tickerCompareValue, startDate: startDate, endDate: endDate }
+            } 
+        } else {
+            body = {
+                channel: channel[1],
+                message: { value: tickerValue, startDate: startDate, endDate: endDate }
+            }
         }
-        console.log(body)
+        
+        console.log(openComparer, body)
         ws.send(JSON.stringify(body))
         ws.onmessage = (evt) => {
             let message = JSON.parse(evt.data)
-            setStock(message)
+            console.log(message)
+            if (message.channel == channel[1]) {
+                setStock(message)
+            }
+            else if (message.channel == channel[2]) {
+                setStock(message.message.firstStock)
+                setStockCompare(message.message.secondStock)
+
+            }
+            
         };
     }
 
-
+    useEffect(() => {
+        console.log(stock, stockCompare)
+    }, [stock, stockCompare])
 
 
   return (
@@ -82,23 +104,32 @@ function App() {
         {openTracker || openComparer ? null : <img src={logo} className="App-logo" alt="logo" />}
         <h1>Stock Tracker</h1>
         {openTracker || openComparer ? null : <Button onClick={() => { setOpenTracker(true); setOpenComparer(false)}} disabled={!tickers} variant="contained" color="primary">Open</Button>}
-        {openTracker || openComparer ? null : <Button onClick={() => { setOpenComparer(true); setOpenTracker(false); }} disabled={!tickers} variant="contained" color="primary">Compare</Button>}
+        {openTracker || openComparer ? null : <Button onClick={() => { setOpenComparer(true); setOpenTracker(true); }} disabled={!tickers} variant="contained" color="primary">Compare</Button>}
 
         <div className="Container">
             {
                 openTracker
                     ? <>
                         <TrackerBase 
-                            tickers={tickers}
-                            tickerValue={tickerValue}
-                            setTickerValue={setTickerValue}
-                            getStockInfo={getStockInfo}
+                                  tickers={tickers}
+                                  tickerValue={tickerValue}
+                                  tickerCompareValue={tickerCompareValue}
+                                  setTickerValue={setTickerValue}
+                                  setTickerCompareValue={setTickerCompareValue}
+                                  getStockInfo={getStockInfo}
+                                  openComparer={openComparer}
                               />
                            
                         
                               {stock == null
                                   ? null
-                                  : <TrackerGraph tickerValue={tickerValue} stock={stock} />
+                                  : <TrackerGraph
+                                      tickerValue={tickerValue}
+                                      tickerCompareValue={tickerCompareValue}
+                                      stock={stock}
+                                      stockCompare={stockCompare}
+                                      openComparer={openComparer}
+                                  />
                             }
                     </>
                     : null

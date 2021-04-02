@@ -8,7 +8,7 @@ import '../App.css';
 
 
 const TrackerBase = (props) => {
-    const { tickers, tickerValue, setTickerValue, getStockInfo } = { ...props }
+    const { tickers, tickerValue, setTickerValue, tickerCompareValue, setTickerCompareValue, openComparer, getStockInfo } = { ...props }
 
 
     const [startDate, setStartDate] = useState('')
@@ -75,6 +75,28 @@ const TrackerBase = (props) => {
                     />
                 )}
             />
+            {openComparer
+                ? <Autocomplete
+                    className="TextField"
+                    options={tickers}
+                    value={tickerCompareValue}
+                    onChange={(event, newValue) => {
+                        setTickerCompareValue(newValue)
+                    }}
+                    color="primary"
+                    renderInput={(params) => (
+                        <TextField
+                            {...params}
+                            label="Select a ticker for comparison"
+                            variant="outlined"
+                            inputProps={{
+                                ...params.inputProps,
+                            }}
+                        />
+                    )}
+                />
+                : null
+            }
             <TextField
                 className="TextField"
                 select
