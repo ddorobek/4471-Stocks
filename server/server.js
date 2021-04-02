@@ -31,63 +31,16 @@ wss.on('connection', function connection(ws) {
             
         } else {
             if (message.channel == channel[0]) {
-                query = 'SELECT DISTINCT symbol FROM Temp_Stocks.tickers;'
-                let con = mysql.createConnection(conCredentials);
-
-                con.connect(function (err) {
-                    if (err) throw err;
-                    console.log("Connected to DB!");
-
-                    con.query(query, function (err, result) {
-                        if (err) throw err; 
-                        let tickers = Object.values(result).map(res => res.symbol)
-                        message = { ...message, message: tickers }
-                        //publisher.publish(channel[0], {message: 'sadsaddsad' });
-                        console.log('publishing...')
-                        publisher.publish(channel[0], JSON.stringify(message));
-                        //ws.send((JSON.stringify({ channel: message.channel, message: message.message, status: 200 })))
-                    });
-                    con.end()
-                });
+                stockListingsService(message)
 
                 //get tickers from sql
                 
             }
             if (message.channel == channel[1]) {
-                let query
-                if (message.message.startDate == null) {
-                    //start date is null, get data from beginning of data to end date range
-                    query = 'SELECT * FROM Stocks.' + message.message.value + '_stock WHERE date <= ' + message.message.endDate + ';'
-                }
-                else if (message.message.endDate == null) {
-                    //end date is null, get data from end date to end of data
-                    query = 'SELECT * FROM Stocks.' + message.message.value + '_stock WHERE date >= ' + message.message.startDate + ';'
-                }
-                else {
-                    query = 'SELECT * FROM Stocks.' + message.message.value + '_stock WHERE date >= ' + message.message.startDate + ' AND date <= ' + message.message.endDate + ';'
-                }
-                console.log(query)
-                let con = mysql.createConnection(conCredentials);
-
-                con.connect(function (err) {
-                    if (err) throw err;
-                    console.log("Connected to DB!");
-
-                    con.query(query, function (err, result) {
-                        if (err) throw err;
-                        let stock = Object.values(result).filter((res, i) => i % 130 == 0)
-
-                        //console.log(stock)
-                        message = { ...message, message: stock }
-                        //publisher.publish(channel[0], {message: 'sadsaddsad' });
-                        publisher.publish(channel[1], JSON.stringify(message));
-                        //ws.send((JSON.stringify({ channel: message.channel, message: message.message, status: 200 })))*/
-                    });
-                    con.end()
-                });
+                stockPerformanceService(message)
             }
             if (message.channel == channel[2]) {
-                publisher.publish(channel[2], 'hello3');
+                stockComparisonService(message)
             }
             
         }
@@ -122,6 +75,112 @@ subscriber.on('subscribe', function (channel, count) {
 });
 
 
+function stockListingsService(message) {
+    query = 'SELECT DISTINCT symbol FROM Temp_Stocks.tickers;'
+    let con = mysql.createConnection(conCredentials);
+
+    con.connect(function (err) {
+        if (err) throw err;
+        console.log("Connected to DB!");
+
+        con.query(query, function (err, result) {
+            if (err) throw err;
+            let tickers = Object.values(result).map(res => res.symbol)
+            message = { ...message, message: tickers }
+            //publisher.publish(channel[0], {message: 'sadsaddsad' });
+            console.log('publishing...')
+            publisher.publish(channel[0], JSON.stringify(message));
+            //ws.send((JSON.stringify({ channel: message.channel, message: message.message, status: 200 })))
+        });
+        con.end()
+    });
+}
+
+function stockPerformanceService(message) {
+    let query
+    if (message.message.startDate == null) {
+        //start date is null, get data from beginning of data to end date range
+        query = 'SELECT * FROM Stocks.' + message.message.value + '_stock WHERE date <= ' + message.message.endDate + ';'
+    }
+    else if (message.message.endDate == null) {
+        //end date is null, get data from end date to end of data
+        query = 'SELECT * FROM Stocks.' + message.message.value + '_stock WHERE date >= ' + message.message.startDate + ';'
+    }
+    else {
+        query = 'SELECT * FROM Stocks.' + message.message.value + '_stock WHERE date >= ' + message.message.startDate + ' AND date <= ' + message.message.endDate + ';'
+    }
+    console.log(query)
+    let con = mysql.createConnection(conCredentials);
+
+    con.connect(function (err) {
+        if (err) throw err;
+        console.log("Connected to DB!");
+
+        con.query(query, function (err, result) {
+            if (err) throw err;
+            let stock = Object.values(result).filter((res, i) => i % 130 == 0)
+
+            //console.log(stock)
+            message = { ...message, message: stock }
+            //publisher.publish(channel[0], {message: 'sadsaddsad' });
+            publisher.publish(channel[1], JSON.stringify(message));
+            //ws.send((JSON.stringify({ channel: message.channel, message: message.message, status: 200 })))*/
+        });
+        con.end()
+    });
+}
+
+function stockComparisonService(message) {
+    let queryFirst
+    let querySecond
+
+    if (message.message.startDate == null) {
+        //start date is null, get data from beginning of data to end date range
+        queryFirst = 'SELECT * FROM Stocks.' + message.message.value.first + '_stock WHERE date <= ' + message.message.endDate + ';'
+        querySecond = 'SELECT * FROM Stocks.' + message.message.value.second + '_stock WHERE date <= ' + message.message.endDate + ';'
+    }
+    else if (message.message.endDate == null) {
+        //end date is null, get data from end date to end of data
+        queryFirst = 'SELECT * FROM Stocks.' + message.message.value.first + '_stock WHERE date >= ' + message.message.startDate + ';'
+        querySecond = 'SELECT * FROM Stocks.' + message.message.value.second + '_stock WHERE date >= ' + message.message.startDate + ';'
+
+    }
+    else {
+        queryFirst = 'SELECT * FROM Stocks.' + message.message.value.first + '_stock WHERE date >= ' + message.message.startDate + ' AND date <= ' + message.message.endDate + ';'
+        querySecond = 'SELECT * FROM Stocks.' + message.message.value.second + '_stock WHERE date >= ' + message.message.startDate + ' AND date <= ' + message.message.endDate + ';'
+    }
+
+    let con = mysql.createConnection(conCredentials);
+
+    con.connect(function (err) {
+        if (err) throw err;
+        console.log("Connected to DB!");
+
+        con.query(queryFirst, function (err, result) {
+            if (err) throw err;
+            let first = Object.values(result).filter((res, i) => i % 130 == 0)
+
+            con.query(querySecond, function (err, result) {
+                if (err) throw err;
+                let second = Object.values(result).filter((res, i) => i % 130 == 0)
+
+                //console.log(stock)
+                message = { ...message, message: { firstStock: first, secondStock: second } }
+                //publisher.publish(channel[0], {message: 'sadsaddsad' });
+                publisher.publish(channel[1], JSON.stringify(message));
+                //ws.send((JSON.stringify({ channel: message.channel, message: message.message, status: 200 })))*/
+            });
+            //console.log(stock)
+            //message = { ...message, message: { first: stock } }
+            //publisher.publish(channel[0], {message: 'sadsaddsad' });
+            //publisher.publish(channel[1], JSON.stringify(message));
+            //ws.send((JSON.stringify({ channel: message.channel, message: message.message, status: 200 })))*/
+        });
+
+        
+        con.end()
+    });
+}
 
 
 

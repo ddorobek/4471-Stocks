@@ -60,8 +60,8 @@ function App() {
         console.log(startDate, endDate)
 
         let body = {
-            channel: channel[1],
-            message: { value: tickerValue, startDate: startDate, endDate: endDate}
+            channel: channel[2],
+            message: { value: { first: tickerValue, second: 'wtsla' }, startDate: startDate, endDate: endDate}
         }
         console.log(body)
         ws.send(JSON.stringify(body))
