@@ -29,6 +29,9 @@ function App() {
     const [openTracker, setOpenTracker] = useState(false)
     const [openComparer, setOpenComparer] = useState(false)
 
+    const [startConst, setStart] = useState(null)
+    const [endConst, setEnd] = useState(null)
+
 
     useEffect(() => {
         ws.onopen = () => {
@@ -83,15 +86,22 @@ function App() {
             console.log(message)
             if (message.channel == channel[1]) {
                 setStock(message)
+                setStart(startDate)
+                setEnd(endDate)
             }
             else if (message.channel == channel[2]) {
                 setStock(message.message.firstStock)
                 setStockCompare(message.message.secondStock)
-
+                setStart(startDate)
+                setEnd(endDate)
             }
             
         };
     }
+
+    useEffect(() => {
+        console.log(stock, stockCompare)
+    }, [stock, stockCompare])
 
     useEffect(() => {
         console.log(stock, stockCompare)
@@ -129,6 +139,8 @@ function App() {
                                       stock={stock}
                                       stockCompare={stockCompare}
                                       openComparer={openComparer}
+                                      startDate={startConst}
+                                      endDate={endConst}
                                   />
                             }
                     </>

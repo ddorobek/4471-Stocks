@@ -5,9 +5,16 @@ import '../App.css';
 
 
 const TrackerBase = (props) => {
-    const { tickerValue, stock, tickerCompareValue, stockCompare, openComparer } = { ...props }
+    const { tickerValue, stock, tickerCompareValue, stockCompare, openComparer , startDate, endDate} = { ...props }
     let stockData = openComparer ? [{ name: 'first', data: stock }, { name: 'second', data: stockCompare }] : stock.message
     console.log(stockData)
+    let xAxis = "date"
+
+    if(startDate == endDate)
+    {
+        xAxis = "time"
+    }
+
     return (
         <>
             <div className="GraphContainer">
@@ -26,7 +33,7 @@ const TrackerBase = (props) => {
                     }}
                 >
                     <CartesianGrid />
-                    <XAxis dataKey="time" domain={['dataMin', 'dataMax']} tick={{ fontSize: '12' }} />
+                    <XAxis dataKey={xAxis} domain={['dataMin', 'dataMax']} tick={{ fontSize: '12' }} />
                     <YAxis dataKey="price" domain={['dataMin', 'dataMax']} tick={{ fontSize: '12' }} />
                     <Tooltip />
                     <Legend />
