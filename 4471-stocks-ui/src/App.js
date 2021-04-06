@@ -7,15 +7,12 @@ import { TextField, Button, CircularProgress } from '@material-ui/core';
 
 import TrackerBase from './components/trackerBase.js'
 import TrackerGraph from './components/trackerGraph.js'
-
-
-
 const ws = new WebSocket("ws://localhost:8080/");
 
 
 function App() {
 
-    const channel = ["stock-listings", "stock-performance", "stock-compare"]
+    const channel = ["stock-listings", "stock-performance", "stock-compare","user-login"]
 
     const [subscribed, setSubscribed] = useState(false)
     const [tickers, setTickers] = useState(null)
@@ -28,15 +25,35 @@ function App() {
 
     const [openTracker, setOpenTracker] = useState(false)
     const [openComparer, setOpenComparer] = useState(false)
+    const [loggedIn, setLogin] = useState(false)
 
     const [startConst, setStart] = useState(null)
     const [endConst, setEnd] = useState(null)
 
+    const [username, setUsername] = useState(null)
+    const [password, setPassword] = useState(null)
+
 
     useEffect(() => {
         ws.onopen = () => {
+            //localStorage.clear();
             console.log('WebSocket Client Connected');
             ws.send(JSON.stringify({ channel: channel[0], message: 'subscribe' }))
+            const loggedUser = localStorage.getItem("loggedIn");
+            if (loggedUser == "true") {
+                const usernameLocal = localStorage.getItem("username");
+                const passwordLocal = localStorage.getItem("password");
+                setLogin(true);
+                setUsername(usernameLocal)
+                setPassword(passwordLocal)
+                //document.getElementById("user-homepage").innerHTML = "Welcome, "+usernameLocal
+            }
+            else{
+                var loginInput = document.getElementById("login");
+                var registerInput = document.getElementById("register");
+                loginInput.addEventListener("click", userLogin);
+                registerInput.addEventListener("click", userRegister);
+            }
         };
 
         ws.onmessage = (evt) => {
@@ -45,6 +62,8 @@ function App() {
             if (message.channel == channel[0] && message.message == "subscribed") {
                 console.log('sending', { channel: channel[1], message: 'subscribe' })
                 ws.send(JSON.stringify({ channel: channel[1], message: 'subscribe' }))
+                console.log('sending', { channel: channel[3], message: 'subscribe' })
+                ws.send(JSON.stringify({ channel: channel[3], message: 'subscribe' }))
             }
             else if (message.channel == channel[1] && message.message == "subscribed") {
                 console.log('sending', { channel: channel[2], message: 'subscribe' })
@@ -103,53 +122,121 @@ function App() {
         console.log(stock, stockCompare)
     }, [stock, stockCompare])
 
-    useEffect(() => {
-        console.log(stock, stockCompare)
-    }, [stock, stockCompare])
 
+    function userLogin(){
+        let body
+        body = {
+            channel: channel[3],
+            message: { username: document.getElementById("username").value, password: document.getElementById("password").value, type: document.getElementById("login").name}
+        } 
+        ws.send(JSON.stringify(body))
+        ws.onmessage = (evt) => {
+            let message = JSON.parse(evt.data)
+            console.log(message)
+            if (message.channel == channel[3]) {
+                setLogin(message.message.loginSuccess)
+                setUsername(body.message.username)
+                setPassword(body.message.password)
+                localStorage.setItem('loggedIn',message.message.loginSuccess)
+                localStorage.setItem('username',body.message.username)
+                localStorage.setItem('password',body.message.password)
+                if(!message.message.loginSuccess){
+                    document.getElementById("login-message").innerHTML = message.message.loginMessage
+                }
+            }
+            
+        };
+    }
 
-  return (
+    function userRegister(){
+        let body
+        body = {
+            channel: channel[3],
+            message: { username: document.getElementById("username").value, password: document.getElementById("password").value, type: document.getElementById("register").name}
+        } 
+        ws.send(JSON.stringify(body))
+        ws.onmessage = (evt) => {
+            let message = JSON.parse(evt.data)
+            console.log(message)
+            if (message.channel == channel[3]) {
+                setLogin(message.message.loginSuccess)
+                document.getElementById("login-message").innerHTML = message.message.loginMessage
+            }
+            
+        };
+    }
+
+    const handleLogout = () => {
+        setLogin(false);
+        setUsername("");
+        setPassword("");
+        localStorage.clear();
+    };
+    
+    if(loggedIn){
+    return (
     <div className="App">
-      <header className="App-header">
+        <header className="App-header">
         {openTracker || openComparer ? null : <img src={logo} className="App-logo" alt="logo" />}
         <h1>Stock Tracker</h1>
         {openTracker || openComparer ? null : <Button onClick={() => { setOpenTracker(true); setOpenComparer(false)}} disabled={!tickers} variant="contained" color="primary">Open</Button>}
         {openTracker || openComparer ? null : <Button onClick={() => { setOpenComparer(true); setOpenTracker(true); }} disabled={!tickers} variant="contained" color="primary">Compare</Button>}
+        <Button onClick={handleLogout} variant="contained" color="primary">Logout</Button>
 
         <div className="Container">
             {
                 openTracker
                     ? <>
                         <TrackerBase 
-                                  tickers={tickers}
-                                  tickerValue={tickerValue}
-                                  tickerCompareValue={tickerCompareValue}
-                                  setTickerValue={setTickerValue}
-                                  setTickerCompareValue={setTickerCompareValue}
-                                  getStockInfo={getStockInfo}
-                                  openComparer={openComparer}
-                              />
+                                    tickers={tickers}
+                                    tickerValue={tickerValue}
+                                    tickerCompareValue={tickerCompareValue}
+                                    setTickerValue={setTickerValue}
+                                    setTickerCompareValue={setTickerCompareValue}
+                                    getStockInfo={getStockInfo}
+                                    openComparer={openComparer}
+                                />
                            
                         
-                              {stock == null
-                                  ? null
-                                  : <TrackerGraph
-                                      tickerValue={tickerValue}
-                                      tickerCompareValue={tickerCompareValue}
-                                      stock={stock}
-                                      stockCompare={stockCompare}
-                                      openComparer={openComparer}
-                                      startDate={startConst}
-                                      endDate={endConst}
-                                  />
+                                {stock == null
+                                    ? null
+                                    : <TrackerGraph
+                                        tickerValue={tickerValue}
+                                        tickerCompareValue={tickerCompareValue}
+                                        stock={stock}
+                                        stockCompare={stockCompare}
+                                        openComparer={openComparer}
+                                        startDate={startConst}
+                                        endDate={endConst}
+                                    />
                             }
                     </>
                     : null
             }
         </div> 
-      </header>
+        </header>
     </div>
-  );
+    );
+    }
+    else{
+    return (
+    <div className="App">
+        <header className="App-header">
+        {openTracker || openComparer ? null : <img src={logo} className="App-logo" alt="logo" />}
+        <h1>Stock Tracker</h1>
+        <p id="login-message"></p>
+            <div className="loginForm">
+                    <input type = "username" id = "username" placeholder = "Username"  style = {{width: "80%"}}/>
+                    <input type = "password" id = "password" placeholder = "Password"   style = {{width: "80%"}}/>
+                    <input type = "submit" id="login" name="login" value = "Login"  style = {{width: "80%"}}/>
+                    <input type = "submit" id="register" name="register" value = "Register"  style = {{width: "80%"}}/>
+            </div>
+        <br/>
+        </header>
+    </div>
+    );
+    }
+
 }
 
 export default App;

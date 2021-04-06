@@ -13,13 +13,14 @@ const subscriber = redis.createClient();
 const publisher = redis.createClient();
 const wss = new WebSocket.Server({ port: 8080 });
 
-const channel = ["stock-listings", "stock-performance", "stock-compare"]
-
+const channel = ["stock-listings", "stock-performance", "stock-compare", "user-login", "watchlist"]
+var auth = {loginMessage:'', loginSuccess:null}
 const conCredentials = {
     host: config.host,
     user: config.user,
     password: config.password
-}
+}   
+    const watchlistSize = 5;
 
     const dates = [
         "20110113",
@@ -67,12 +68,14 @@ wss.on('connection', function connection(ws) {
             if (message.channel == channel[2]) {
                 stockComparisonService(message)
             }
+            if(message.channel == channel[3]){
+                userAuthentication(message)
+            }
+            if(message.channel == channel[4]){
+                watchlist(message)
+            }
             
         }
-
-       
-        
-        
 
     };
     // broadcast on web socket when receving a Redis PUB/SUB Event
@@ -98,6 +101,140 @@ subscriber.on('subscribe', function (channel, count) {
     //ws.send(JSON.stringify({ channel: channel, message: 'subscribed' }))
     //ws.close()
 });
+
+
+/*
+function watchlist(message) {
+    let con = mysql.createConnection(conCredentials);
+    con.connect(function (err) {
+        console.log("Connected to DB!");
+        if(message.message.type == "get"){
+            query = 'SELECT watchlist FROM Temp_Stocks.accounts WHERE username = "'+message.message.username+'" AND pass = "'+message.message.password+'";'
+            con.query(query, function (err, result) {
+                if (err) throw err;
+                message = { ...message, message: result }
+                console.log('publishing...')
+                publisher.publish(channel[3], JSON.stringify(message));
+                con.end()
+            }
+       }
+       else if(message.message.type == "insert"){
+            let stock = message.message.stock
+            query = 'SELECT watchlist FROM Temp_Stocks.accounts WHERE username = "'+message.message.username+'" AND pass = "'+message.message.password+'";'
+            con.query(query, function (err, result) {
+                if (err) throw err;
+                let watchlist = (result[0].watchlist).split(",")
+                if(watchlist.length > watchlistSize){
+                    // either delete or send back error message
+                }
+                else{
+                    let finalWatchlist = result[0].watchlist+","+stock
+                    query = 'UPDATE Temp_Stocks.accounts SET watchlist = "'+finalWatchlist+'" WHERE username = "'+message.message.username+'" AND pass = "'+message.message.password+'";'
+                    con.query(query, function (err, result) {
+                        if (err) throw err;
+                        message = { ...message, message: finalWatchlist }
+                        console.log('publishing...')
+                        publisher.publish(channel[3], JSON.stringify(message));
+                        con.end()
+                    }
+                }
+            }
+       }
+       else if(message.message.type == "delete"){
+            let stock = message.message.stock
+            query = 'SELECT watchlist FROM Temp_Stocks.accounts WHERE username = "'+message.message.username+'" AND pass = "'+message.message.password+'";'
+            con.query(query, function (err, result) {
+                if (err) throw err;
+                let watchlist = (result[0].watchlist).split(",")
+                if(stock in watchlist){
+                    watchlist.delete(stock)
+                    let finalWatchlist = ""
+                    for(var i =0; i<watchlist.length;i++){
+                        if(i+1 == watchlist.length){
+                            finalWatchlist = finalWatchlist+watchlist[i]
+                        }
+                        else{
+                            finalWatchlist = finalWatchlist+watchlist[i]+","
+                        }
+                    }
+                    query = 'UPDATE Temp_Stocks.accounts SET watchlist = "'+finalWatchlist+'" WHERE username = "'+message.message.username+'" AND pass = "'+message.message.password+'";'
+                    con.query(query, function (err, result) {
+                        if (err) throw err;
+                        message = { ...message, message: finalWatchlist }
+                        console.log('publishing...')
+                        publisher.publish(channel[3], JSON.stringify(message));
+                        con.end()
+                    }
+                }
+                else{
+                    // send error message
+                }
+            }      
+       }
+    }
+
+}
+*/
+
+
+function userAuthentication(message){
+    //console.log("USER AUTHENTICATION MESSAGE: ", message)
+    query = 'SELECT * FROM Temp_Stocks.accounts WHERE username = "'+message.message.username+'" AND pass = "'+message.message.password+'";'
+    let con = mysql.createConnection(conCredentials);
+    con.connect(function (err) {
+        if (err) throw err;
+        console.log("Connected to DB!");
+
+        con.query(query, function (err, result) {
+            if (err) throw err;
+            if(result.length == 0)
+            {
+                if(message.message.type == "login"){
+                    auth.loginSuccess = false;
+                    auth.loginMessage = "Login failed, account does not exist."
+                    message = { ...message, message: auth }
+                    console.log('publishing...')
+                    publisher.publish(channel[3], JSON.stringify(message));
+                    //ws.send((JSON.stringify({ channel: message.channel, message: message.message, status: 200 })))
+                    con.end()
+                }
+                else if(message.message.type == "register"){
+                    query = 'INSERT INTO Temp_Stocks.accounts(id,username,pass,watchlist) VALUES (null,"'+message.message.username+'","'+message.message.password+'",null);'
+                    con.query(query, function (err, result) {
+                        if (err) throw err;
+                        auth.loginSuccess = false;
+                        auth.loginMessage = "Registration successful."
+                        message = { ...message, message: auth }
+                        console.log('publishing...')
+                        publisher.publish(channel[3], JSON.stringify(message));
+                        //ws.send((JSON.stringify({ channel: message.channel, message: message.message, status: 200 })))
+                        con.end()
+                    });
+                }
+            }
+            else{
+                if(message.message.type == "login"){
+                    auth.loginSuccess = true;
+                    auth.loginMessage = "Login successful."
+                    message = { ...message, message: auth }
+                    console.log('publishing...')
+                    publisher.publish(channel[3], JSON.stringify(message));
+                    //ws.send((JSON.stringify({ channel: message.channel, message: message.message, status: 200 })))
+                    con.end()
+                }
+                else if(message.message.type == "register"){
+                    auth.loginSuccess = false;
+                    auth.loginMessage = "Registration failed, account already exists."
+                    message = { ...message, message: auth }
+                    console.log('publishing...')
+                    publisher.publish(channel[3], JSON.stringify(message));
+                    //ws.send((JSON.stringify({ channel: message.channel, message: message.message, status: 200 })))
+                    con.end()
+                }
+            }
+        });
+    });
+}
 
 
 function stockListingsService(message) {
