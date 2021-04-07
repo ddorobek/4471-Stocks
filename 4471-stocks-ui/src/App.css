@@ -9,19 +9,20 @@
 
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
-    animation: App-logo-spin infinite 20s linear;
+    /*animation: App-logo-spin infinite 20s linear;*/
   }
 }
 
 .App-header {
-  background-color: grey;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+    background-color: lightgrey;
+    min-height: 100vh;
+    min-width: 100vw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: calc(10px + 2vmin);
+    color: white;
 }
 
 .App-link {
@@ -39,7 +40,9 @@
 
 .TextField {
     width: 100%;
-    margin-bottom: 3vh;
+    margin-bottom: 2vh;
+    background-color: white;
+    border-radius: 4px;
 }
 
 .Container {
@@ -55,4 +58,22 @@
 
 .TrackerContainer {
     padding: 2vh 2vw;
+    width: 30%;
+}
+
+.HeaderContainer {
+    flex-direction: row;
+    width: 100%;
+}
+
+
+.LoginContainer {
+    width: 50%;
+    display: inline-flex;
+    flex-flow: column;
+}
+
+.AddStockContainer {
+    display: flex;
+    align-content: stretch;
 }
