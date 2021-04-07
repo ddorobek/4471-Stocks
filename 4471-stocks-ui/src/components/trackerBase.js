@@ -5,7 +5,7 @@ import '../App.css';
 
 
 const TrackerBase = (props) => {
-    const { tickers, tickerValue, setTickerValue, tickerCompareValue, setTickerCompareValue, startDate, endDate, setStartDate, setEndDate, openComparer, getStockInfo } = { ...props }
+    const { loading, tickers, tickerValue, setTickerValue, tickerCompareValue, setTickerCompareValue, startDate, endDate, setStartDate, setEndDate, openComparer, getStockInfo } = { ...props }
 
     const dates = [
         "2011/01/13",
@@ -134,7 +134,7 @@ const TrackerBase = (props) => {
                 variant="contained"
                 color="primary"
                 disabled={isSearchDisabled()}>
-                See Stock Performance
+                {loading ? <CircularProgress style={{ color: 'white' }}/> : <p>See Stock Performance</p>}
             </Button>
             
         </div>

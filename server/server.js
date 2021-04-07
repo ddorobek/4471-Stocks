@@ -113,7 +113,7 @@ function watchlist(message) {
             con.query(query, function (err, result) {
                 if (err) throw err;
                 let finalResult
-                if (result[0].watchlist == null) {
+                if (result[0].watchlist == "") {
                     finalResult = []
                 } else {
                     finalResult = result[0].watchlist.split(",")
@@ -130,9 +130,8 @@ function watchlist(message) {
             query = 'SELECT watchlist FROM Temp_Stocks.accounts WHERE username = "'+message.message.username+'" AND pass = "'+message.message.password+'";'
             con.query(query, function (err, result) {
                 if (err) throw err;
-                let watchlist = result[0].watchlist == null ? [] : (result[0].watchlist).split(",")
 
-                let finalWatchlist = result[0].watchlist == null ? stock : result[0].watchlist+","+stock
+                let finalWatchlist = result[0].watchlist == "" ? stock : result[0].watchlist+","+stock
                 query = 'UPDATE Temp_Stocks.accounts SET watchlist = "'+finalWatchlist+'" WHERE username = "'+message.message.username+'" AND pass = "'+message.message.password+'";'
                 con.query(query, function (err, result) {
                     if (err) throw err;
@@ -153,6 +152,7 @@ function watchlist(message) {
                 console.log(watchlist)
                 finalWatchlist = watchlist.filter(s => s != stock)
                 finalWatchlist = finalWatchlist.join(",")
+                if (finalWatchlist == "") finalWatchlist = []
                 
                 query = 'UPDATE Temp_Stocks.accounts SET watchlist = "'+finalWatchlist+'" WHERE username = "'+message.message.username+'" AND pass = "'+message.message.password+'";'
                 con.query(query, function (err, result) {
@@ -190,7 +190,7 @@ function userAuthentication(message){
                     con.end()
                 }
                 else if(message.message.type == "register"){
-                    query = 'INSERT INTO Temp_Stocks.accounts(id,username,pass,watchlist) VALUES (null,"'+message.message.username+'","'+message.message.password+'",null);'
+                    query = 'INSERT INTO Temp_Stocks.accounts(id,username,pass,watchlist) VALUES (null,"'+message.message.username+'","'+message.message.password+'","");'
                     con.query(query, function (err, result) {
                         if (err) throw err;
                         auth.loginSuccess = false;

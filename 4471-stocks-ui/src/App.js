@@ -126,21 +126,22 @@ function App() {
                 setEnd(endDate)
                 setLoading(false)
             }
-            
+
+            setLoading(false)
         };
     }
 
     const navigateToStock = (stock) => {
-        setStart("20110113")
+        /*setStart("20110113")
         setEnd("20110113")
         setStartDate("2011/01/13")
-        setEndDate("2011/01/13")
+        setEndDate("2011/01/13")*/
         setOpenComparer(false);
         setOpenTracker(true);
         setOpenWatchlist(false);
         setTickerValue(stock)
         
-        getStockInfo(stock, "20110113", "20110113")
+        getStockInfo(stock, "20110113", "20111207")
 
     }
 
@@ -184,7 +185,7 @@ function App() {
             ws.send(JSON.stringify(body))
             ws.onmessage = (evt) => {
                 let message = JSON.parse(evt.data)
-                let list = message.message.split(',')
+                let list = message.message == [] ? message.message.split(',') : ""
                 console.log(message)
                 setWatchlist(list)
                 //ws.close()
@@ -292,36 +293,37 @@ function App() {
                 <div className="Container">
                     {
                         openTracker || openComparer
-                            ? <>
-                                <TrackerBase 
-                                        tickers={tickers}
-                                        tickerValue={tickerValue}
-                                        tickerCompareValue={tickerCompareValue}
-                                        setTickerValue={setTickerValue}
-                                        setTickerCompareValue={setTickerCompareValue}
-                                        getStockInfo={getStockInfo}
-                                        openComparer={openComparer}
-                                        startDate={startDate}
-                                        endDate={endDate}
-                                        setStartDate={setStartDate}
-                                        setEndDate={setEndDate}
-                                        />
+                        ?  <>
+                                    <TrackerBase 
+                                            loading={loading}
+                                            tickers={tickers}
+                                            tickerValue={tickerValue}
+                                            tickerCompareValue={tickerCompareValue}
+                                            setTickerValue={setTickerValue}
+                                            setTickerCompareValue={setTickerCompareValue}
+                                            getStockInfo={getStockInfo}
+                                            openComparer={openComparer}
+                                            startDate={startDate}
+                                            endDate={endDate}
+                                            setStartDate={setStartDate}
+                                            setEndDate={setEndDate}
+                                            />
                            
                         
-                                        {stock == null
-                                            ? null
-                                            : <TrackerGraph
-                                                tickerValue={tickerValue}
-                                                tickerCompareValue={tickerCompareValue}
-                                                stock={stock}
-                                                stockCompare={stockCompare}
-                                                openComparer={openComparer}
-                                                startDate={startConst}
-                                                endDate={endConst}
-                                            />
-                                    }
-                            </>
-                            : null
+                                            {stock == null
+                                                ? null
+                                                : <TrackerGraph
+                                                    tickerValue={tickerValue}
+                                                    tickerCompareValue={tickerCompareValue}
+                                                    stock={stock}
+                                                    stockCompare={stockCompare}
+                                                    openComparer={openComparer}
+                                                    startDate={startConst}
+                                                    endDate={endConst}
+                                                />
+                                        }
+                                </>
+                        : null
                     }
                 </div> 
             </header>
