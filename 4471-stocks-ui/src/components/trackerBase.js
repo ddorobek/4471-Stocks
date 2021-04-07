@@ -1,18 +1,11 @@
 import { useEffect, useState } from 'react';
 import { TextField, MenuItem, Button, CircularProgress } from '@material-ui/core';
 import Autocomplete from '@material-ui/lab/Autocomplete';
-import DatePicker from '@material-ui/lab/DatePicker';
-import AdapterDateFns from '@material-ui/lab/AdapterDateFns';
-import LocalizationProvider from '@material-ui/lab/LocalizationProvider';
 import '../App.css';
 
 
 const TrackerBase = (props) => {
-    const { tickers, tickerValue, setTickerValue, tickerCompareValue, setTickerCompareValue, openComparer, getStockInfo } = { ...props }
-
-
-    const [startDate, setStartDate] = useState('')
-    const [endDate, setEndDate] = useState('')
+    const { tickers, tickerValue, setTickerValue, tickerCompareValue, setTickerCompareValue, startDate, endDate, setStartDate, setEndDate, openComparer, getStockInfo } = { ...props }
 
     const dates = [
         "2011/01/13",
@@ -58,6 +51,7 @@ const TrackerBase = (props) => {
         <div className="TrackerContainer">
             <Autocomplete
                 className="TextField"
+                fullWidth
                 options={tickers}
                 value={tickerValue}
                 onChange={(event, newValue) => {
@@ -78,6 +72,7 @@ const TrackerBase = (props) => {
             {openComparer
                 ? <Autocomplete
                     className="TextField"
+                    fullWidth
                     options={tickers}
                     value={tickerCompareValue}
                     onChange={(event, newValue) => {
@@ -99,6 +94,8 @@ const TrackerBase = (props) => {
             }
             <TextField
                 className="TextField"
+                fullWidth
+                style={{marginBottom: '2vh'}}
                 select
                 label="Select a start date"
                 variant="outlined"
@@ -115,6 +112,8 @@ const TrackerBase = (props) => {
             </TextField>
             <TextField
                 className="TextField"
+                fullWidth
+                style={{marginBottom: '2vh'}}
                 select
                 label="Select an end date"
                 variant="outlined"
@@ -128,34 +127,18 @@ const TrackerBase = (props) => {
                     ))
                 }
             </TextField>
-            <Button onClick={() => getStockInfo(startDate, endDate)} variant="contained" color="primary" disabled={isSearchDisabled()}>See Stock Performance</Button>
+            <Button
+                fullWidth
+                style={{width: '100%'}}
+                onClick={() => getStockInfo(startDate, endDate)}
+                variant="contained"
+                color="primary"
+                disabled={isSearchDisabled()}>
+                See Stock Performance
+            </Button>
             
         </div>
     )
 }
 
 export default TrackerBase
-
-
-{/*tickerValue != null
-                ? <>
-
-                    <LocalizationProvider dateAdapter={AdapterDateFns}>
-
-                        <DatePicker
-                            value={stockDate}
-                            minDate={new Date('2011-01-14')}
-                            maxDate={new Date('2012-01-13')}
-                            className="TextField"
-                            defaultCalendarMonth={new Date('2011-01-13')}
-                            onChange={(newValue) => {
-                                console.log(newValue)
-                                setStockDate(newValue);
-                            }}
-                            renderInput={(params) => <TextField {...params} />}
-                        />
-                    </LocalizationProvider>
-                    <Button fullWidth variant="contained" color="primary" onClick={() => getStockInfo()}>See Stock</Button>
-                </>
-                : null
-            */}

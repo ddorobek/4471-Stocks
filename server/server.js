@@ -103,42 +103,43 @@ subscriber.on('subscribe', function (channel, count) {
 });
 
 
-/*
+
 function watchlist(message) {
     let con = mysql.createConnection(conCredentials);
     con.connect(function (err) {
-        console.log("Connected to DB!");
+        console.log("Connected to DB!", message.message);
         if(message.message.type == "get"){
             query = 'SELECT watchlist FROM Temp_Stocks.accounts WHERE username = "'+message.message.username+'" AND pass = "'+message.message.password+'";'
             con.query(query, function (err, result) {
                 if (err) throw err;
-                message = { ...message, message: result }
-                console.log('publishing...')
-                publisher.publish(channel[3], JSON.stringify(message));
+                if (result[0].watchlist == null) {
+                    result[0].watchlist = []
+                }
+
+                message = { ...message, message: result[0].watchlist.split(",") }
+                console.log('publishing...', result)
+                publisher.publish(channel[4], JSON.stringify(message));
                 con.end()
-            }
+            })
        }
        else if(message.message.type == "insert"){
             let stock = message.message.stock
             query = 'SELECT watchlist FROM Temp_Stocks.accounts WHERE username = "'+message.message.username+'" AND pass = "'+message.message.password+'";'
             con.query(query, function (err, result) {
                 if (err) throw err;
-                let watchlist = (result[0].watchlist).split(",")
-                if(watchlist.length > watchlistSize){
-                    // either delete or send back error message
-                }
-                else{
-                    let finalWatchlist = result[0].watchlist+","+stock
-                    query = 'UPDATE Temp_Stocks.accounts SET watchlist = "'+finalWatchlist+'" WHERE username = "'+message.message.username+'" AND pass = "'+message.message.password+'";'
-                    con.query(query, function (err, result) {
-                        if (err) throw err;
-                        message = { ...message, message: finalWatchlist }
-                        console.log('publishing...')
-                        publisher.publish(channel[3], JSON.stringify(message));
-                        con.end()
-                    }
-                }
-            }
+                let watchlist = result[0].watchlist == null ? [] : (result[0].watchlist).split(",")
+
+                let finalWatchlist = result[0].watchlist+","+stock
+                query = 'UPDATE Temp_Stocks.accounts SET watchlist = "'+finalWatchlist+'" WHERE username = "'+message.message.username+'" AND pass = "'+message.message.password+'";'
+                con.query(query, function (err, result) {
+                    if (err) throw err;
+                    message = { ...message, message: finalWatchlist }
+                    console.log('publishing...')
+                    publisher.publish(channel[4], JSON.stringify(message));
+                    con.end()
+                })
+                
+            })
        }
        else if(message.message.type == "delete"){
             let stock = message.message.stock
@@ -162,19 +163,17 @@ function watchlist(message) {
                         if (err) throw err;
                         message = { ...message, message: finalWatchlist }
                         console.log('publishing...')
-                        publisher.publish(channel[3], JSON.stringify(message));
+                        publisher.publish(channel[4], JSON.stringify(message));
                         con.end()
-                    }
+                    })
                 }
                 else{
                     // send error message
                 }
-            }      
+            })    
        }
-    }
-
+    })
 }
-*/
 
 
 function userAuthentication(message){

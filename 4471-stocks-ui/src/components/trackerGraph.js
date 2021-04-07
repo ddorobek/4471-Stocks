@@ -4,7 +4,7 @@ import '../App.css';
 
 
 
-const TrackerBase = (props) => {
+const TrackerGraph = (props) => {
     const { tickerValue, stock, tickerCompareValue, stockCompare, openComparer , startDate, endDate} = { ...props }
     let stockData = openComparer ? [{ name: 'first', data: stock }, { name: 'second', data: stockCompare }] : stock.message
     console.log(stockData)
@@ -44,11 +44,10 @@ const TrackerBase = (props) => {
                         : <Line type="monotone" name="Price" dataKey="price" stroke="#8884d8" activeDot={{ r: 1 }} />
                     }
                     
-                    {/*<Line type="monotone" dataKey="uv" stroke="#82ca9d" />*/}
                 </LineChart>
             </div>
         </>
     )
 }
 
-export default TrackerBase;
+export default TrackerGraph;
