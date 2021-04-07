@@ -185,7 +185,7 @@ function App() {
             ws.send(JSON.stringify(body))
             ws.onmessage = (evt) => {
                 let message = JSON.parse(evt.data)
-                let list = message.message == [] ? message.message.split(',') : ""
+                let list = message.message != [] ? message.message.split(',') : []
                 console.log(message)
                 setWatchlist(list)
                 //ws.close()
@@ -248,17 +248,22 @@ function App() {
     };
 
     const handlePageNavigation = (type) => {
-        setStock(null)
-        setStockCompare(null)
-        setTickerValue(null)
-        setTickerCompareValue(null)
+        
 
         if (type == 0) {
             setOpenTracker(true);
             setOpenComparer(false);
+            setStock(null)
+            setStockCompare(null)
+            setTickerValue(null)
+            setTickerCompareValue(null)
         } else if (type == 1) {
             setOpenComparer(true);
             setOpenTracker(false);
+            setStock(null)
+            setStockCompare(null)
+            setTickerValue(null)
+            setTickerCompareValue(null)
         } else if (type == 2) {
             setOpenWatchlist(true);
         }
@@ -333,17 +338,18 @@ function App() {
     else{
         return (
         <div className="App">
-            <Header 
-            />
+            <header className="App-header">
+            <Header />
             <p id="login-message"></p>
                 <div className="LoginContainer">
-                    <TextField style={{ marginBottom: '1vh' }} inputRef={userInput} fullWidth type="username" id="username" name="username" placeholder="Username" />
-                    <TextField style={{ marginBottom: '4vh' }} inputRef={passInput} fullWidth type="password" id="password" name="password" placeholder="Password" />
+                    <TextField className="TextField" style={{ marginBottom: '1vh' }} inputRef={userInput} fullWidth type="username" id="username" name="username" placeholder="Username" />
+                    <TextField className="TextField" style={{ marginBottom: '4vh' }} inputRef={passInput} fullWidth type="password" id="password" name="password" placeholder="Password" />
 
                     <Button onClick={() => userLogin()} style={{ marginBottom: '1vh' }} fullWidth variant="contained" color="primary">Login</Button>
                     <Button onClick={() => userRegister()} fullWidth variant="contained" color="primary">Register</Button>
                 </div>
             <br/>
+            </header>
         </div>
         );
         }
