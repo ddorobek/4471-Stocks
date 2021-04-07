@@ -91,7 +91,8 @@ function App() {
 
     }, []);
 
-    const getStockInfo = (start, end) => {
+    const getStockInfo = (stock, start, end) => {
+        console.log(stock)
         setLoading(true)
         let startDate = start != '' ? start.replace(/\//g, "") : null
         let endDate = end != '' ? end.replace(/\//g, "") : null
@@ -99,12 +100,12 @@ function App() {
         if (openComparer) {
             body = {
                 channel: channel[2],
-                message: { value: tickerValue, compare: tickerCompareValue, startDate: startDate, endDate: endDate }
+                message: { value: stock, compare: tickerCompareValue, startDate: startDate, endDate: endDate }
             } 
         } else {
             body = {
                 channel: channel[1],
-                message: { value: tickerValue, startDate: startDate, endDate: endDate }
+                message: { value: stock, startDate: startDate, endDate: endDate }
             }
         }
         
@@ -129,15 +130,66 @@ function App() {
         };
     }
 
+    const navigateToStock = (stock) => {
+        setStart("20110113")
+        setEnd("20110113")
+        setStartDate("2011/01/13")
+        setEndDate("2011/01/13")
+        setOpenComparer(false);
+        setOpenTracker(true);
+        setOpenWatchlist(false);
+        setTickerValue(stock)
+        
+        getStockInfo(stock, "20110113", "20110113")
+
+    }
+
     const getWatchlist = () => {
         let body = { channel: channel[4], message: { username: localStorage.getItem("username"), password: localStorage.getItem("password"), type: 'get' } }
         console.log(body)
         ws.send(JSON.stringify(body))
         ws.onmessage = (evt) => {
             let message = JSON.parse(evt.data)
-            setWatchlist(message)
+            console.log(message)
+            setWatchlist(message.message)
 
         };
+    }
+
+    const addToWatchlist = (newStock) => {
+        if (!watchlist.includes(newStock)) {
+            let body
+            body = {
+                channel: channel[4],
+                message: { stock: newStock, username: username, password: password, type: "insert" }
+            }
+            ws.send(JSON.stringify(body))
+            ws.onmessage = (evt) => {
+                let message = JSON.parse(evt.data)
+                let list = message.message.split(',')
+                setWatchlist(list)
+                //ws.close()
+            };
+        }
+    }
+
+    const removeFromWatchlist = (delStock) => {
+        if (watchlist.includes(delStock)) {
+            console.log(delStock)
+            let body
+            body = {
+                channel: channel[4],
+                message: { stock: delStock, username: username, password: password, type: "delete" }
+            }
+            ws.send(JSON.stringify(body))
+            ws.onmessage = (evt) => {
+                let message = JSON.parse(evt.data)
+                let list = message.message.split(',')
+                console.log(message)
+                setWatchlist(list)
+                //ws.close()
+            };
+        }
     }
 
 
@@ -210,21 +262,6 @@ function App() {
             setOpenWatchlist(true);
         }
     }
-
-    const addToWatchlist = (newStock) => {
-        let body
-        body = {
-            channel: channel[4],
-            message: { stock: newStock, username: username, password: password, type: "insert" }
-        }
-        ws.send(JSON.stringify(body))
-        ws.onmessage = (evt) => {
-            let message = JSON.parse(evt.data)
-            let list = message.message.split(',')
-            setWatchlist(list)
-            //ws.close()
-        };
-    }
     
     if(loggedIn){
         return (
@@ -232,7 +269,16 @@ function App() {
             <header className="App-header">
                     {openWatchlist
                         ? <>
-                            <Watchlist getWatchlist={getWatchlist} addToWatchlist={addToWatchlist} tickers={tickers} watchlist={watchlist} setWatchlist={setWatchlist} openWatchlist={openWatchlist} setOpenWatchlist={setOpenWatchlist} />
+                            <Watchlist
+                                navigateToStock={navigateToStock}
+                                getWatchlist={getWatchlist}
+                                addToWatchlist={addToWatchlist}
+                                removeFromWatchlist={removeFromWatchlist}
+                                tickers={tickers}
+                                watchlist={watchlist}
+                                setWatchlist={setWatchlist}
+                                openWatchlist={openWatchlist}
+                                setOpenWatchlist={setOpenWatchlist} />
                         </>
                         : null}
                 <Header

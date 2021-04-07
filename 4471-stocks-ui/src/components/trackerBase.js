@@ -130,7 +130,7 @@ const TrackerBase = (props) => {
             <Button
                 fullWidth
                 style={{width: '100%'}}
-                onClick={() => getStockInfo(startDate, endDate)}
+                onClick={() => getStockInfo(tickerValue, startDate, endDate)}
                 variant="contained"
                 color="primary"
                 disabled={isSearchDisabled()}>

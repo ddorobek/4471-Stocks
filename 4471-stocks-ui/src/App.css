@@ -76,4 +76,12 @@
 .AddStockContainer {
     display: flex;
     align-content: stretch;
+    min-width: 15vw;
+    margin-bottom: 2vh;
+}
+
+.WatchlistContainer {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 2vh;
 }
