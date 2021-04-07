@@ -4,7 +4,7 @@ import '../App.css';
 
 
 
-const TrackerBase = (props) => {
+const TrackerGraph = (props) => {
     const { tickerValue, stock, tickerCompareValue, stockCompare, openComparer , startDate, endDate} = { ...props }
     let stockData = openComparer ? [{ name: 'first', data: stock }, { name: 'second', data: stockCompare }] : stock.message
     console.log(stockData)
@@ -51,4 +51,4 @@ const TrackerBase = (props) => {
     )
 }
 
-export default TrackerBase;
+export default TrackerGraph;
