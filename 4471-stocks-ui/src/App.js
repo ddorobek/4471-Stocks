@@ -61,7 +61,6 @@ function App() {
 
         ws.onmessage = (evt) => {
             let message = JSON.parse(evt.data)
-            console.log('received message...',message)
             if (message.channel == channel[0] && message.message == "subscribed") {
                 ws.send(JSON.stringify({ channel: channel[0], message: 'get' }))
                 console.log('sending', { channel: channel[1], message: 'subscribe' })
@@ -92,7 +91,6 @@ function App() {
     }, []);
 
     const getStockInfo = (stock, start, end) => {
-        console.log(stock)
         setLoading(true)
         let startDate = start != '' ? start.replace(/\//g, "") : null
         let endDate = end != '' ? end.replace(/\//g, "") : null
@@ -112,7 +110,6 @@ function App() {
         ws.send(JSON.stringify(body))
         ws.onmessage = (evt) => {
             let message = JSON.parse(evt.data)
-            console.log(message)
             if (message.channel == channel[1]) {
                 setStock(message)
                 setStart(startDate)
@@ -176,7 +173,6 @@ function App() {
 
     const removeFromWatchlist = (delStock) => {
         if (watchlist.includes(delStock)) {
-            console.log(delStock)
             let body
             body = {
                 channel: channel[4],
@@ -203,7 +199,6 @@ function App() {
         ws.send(JSON.stringify(body))
         ws.onmessage = (evt) => {
             let message = JSON.parse(evt.data)
-            console.log(message)
             if (message.channel == channel[3]) {
                 setLogin(message.message.loginSuccess)
                 setUsername(body.message.username)
@@ -228,7 +223,6 @@ function App() {
         ws.send(JSON.stringify(body))
         ws.onmessage = (evt) => {
             let message = JSON.parse(evt.data)
-            console.log(message)
             if (message.channel == channel[3]) {
                 setLogin(message.message.loginSuccess)
                 document.getElementById("login-message").innerHTML = message.message.loginMessage

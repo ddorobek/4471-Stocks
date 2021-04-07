@@ -7,7 +7,6 @@ import '../App.css';
 const TrackerGraph = (props) => {
     const { tickerValue, stock, tickerCompareValue, stockCompare, openComparer , startDate, endDate} = { ...props }
     let stockData = openComparer ? [{ name: 'first', data: stock }, { name: 'second', data: stockCompare }] : stock.message
-    console.log(stockData)
     let xAxis = "date"
 
     if(startDate == endDate)
