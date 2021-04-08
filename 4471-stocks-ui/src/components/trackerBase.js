@@ -5,7 +5,7 @@ import '../App.css';
 
 
 const TrackerBase = (props) => {
-    const { loading, tickers, tickerValue, setTickerValue, tickerCompareValue, setTickerCompareValue, startDate, endDate, setStartDate, setEndDate, openComparer, getStockInfo } = { ...props }
+    const { loading, tickers, tickerValue, setTickerValue, setTickerCompany1, setTickerCompany2, tickerCompareValue, setTickerCompareValue, startDate, endDate, setStartDate, setEndDate, openComparer, getStockInfo } = { ...props }
 
     const dates = [
         "2011/01/13",
@@ -52,10 +52,12 @@ const TrackerBase = (props) => {
             <Autocomplete
                 className="TextField"
                 fullWidth
-                options={tickers}
+                options={tickers.combined}
                 value={tickerValue}
                 onChange={(event, newValue) => {
-                    setTickerValue(newValue)
+                    var index = tickers.combined.indexOf(newValue)
+                    setTickerValue(tickers.symbols[index])
+                    setTickerCompany1(tickers.names[index])
                 }}
                 color="primary"
                 renderInput={(params) => (
@@ -73,10 +75,12 @@ const TrackerBase = (props) => {
                 ? <Autocomplete
                     className="TextField"
                     fullWidth
-                    options={tickers}
+                    options={tickers.combined}
                     value={tickerCompareValue}
                     onChange={(event, newValue) => {
-                        setTickerCompareValue(newValue)
+                        var index = tickers.combined.indexOf(newValue)
+                        setTickerCompareValue(tickers.symbols[index])
+                        setTickerCompany2(tickers.names[index])
                     }}
                     color="primary"
                     renderInput={(params) => (

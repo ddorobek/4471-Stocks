@@ -50,7 +50,7 @@ const Watchlist = (props) => {
                         className="TextField"
                         fullWidth
                         disabled={watchlist.length >= 5}
-                        options={tickers}
+                        options={tickers.symbols}
                         value={newStock}
                         onChange={(event, newValue) => {
                             setNewStock(newValue)

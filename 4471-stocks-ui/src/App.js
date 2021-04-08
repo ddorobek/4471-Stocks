@@ -18,6 +18,8 @@ function App() {
 
     const [tickers, setTickers] = useState(null)
     const [tickerValue, setTickerValue] = useState(null)
+    const [tickerCompany1, setTickerCompany1] = useState(null)
+    const [tickerCompany2, setTickerCompany2] = useState(null)
     const [tickerCompareValue, setTickerCompareValue] = useState(null)
 
     const [stock, setStock] = useState(null)
@@ -90,22 +92,31 @@ function App() {
 
     }, []);
 
-    const getStockInfo = (stock, start, end) => {
+    const getStockInfo = (stock, start, end, watchlist) => {
         setLoading(true)
         let startDate = start != '' ? start.replace(/\//g, "") : null
         let endDate = end != '' ? end.replace(/\//g, "") : null
         let body
-        if (openComparer) {
-            body = {
-                channel: channel[2],
-                message: { value: stock, compare: tickerCompareValue, startDate: startDate, endDate: endDate }
-            } 
-        } else {
+
+        if (watchlist) {
             body = {
                 channel: channel[1],
                 message: { value: stock, startDate: startDate, endDate: endDate }
             }
+        } else {
+            if (openComparer) {
+                body = {
+                    channel: channel[2],
+                    message: { value: stock, compare: tickerCompareValue, startDate: startDate, endDate: endDate }
+                }
+            } else {
+                body = {
+                    channel: channel[1],
+                    message: { value: stock, startDate: startDate, endDate: endDate }
+                }
+            }
         }
+        
         
         ws.send(JSON.stringify(body))
         ws.onmessage = (evt) => {
@@ -137,18 +148,18 @@ function App() {
         setOpenTracker(true);
         setOpenWatchlist(false);
         setTickerValue(stock)
+        var index = tickers.symbols.indexOf(stock)
+        setTickerCompany1(tickers.names[index])
         
-        getStockInfo(stock, "20110113", "20111207")
+        getStockInfo(stock, "20110113", "20111207", true)
 
     }
 
     const getWatchlist = () => {
         let body = { channel: channel[4], message: { username: localStorage.getItem("username"), password: localStorage.getItem("password"), type: 'get' } }
-        console.log(body)
         ws.send(JSON.stringify(body))
         ws.onmessage = (evt) => {
             let message = JSON.parse(evt.data)
-            console.log(message)
             setWatchlist(message.message)
 
         };
@@ -181,8 +192,7 @@ function App() {
             ws.send(JSON.stringify(body))
             ws.onmessage = (evt) => {
                 let message = JSON.parse(evt.data)
-                let list = message.message != [] ? message.message.split(',') : []
-                console.log(message)
+                let list = (message.message != [] || message.message != "") ? message.message.split(',') : []
                 setWatchlist(list)
                 //ws.close()
             };
@@ -299,6 +309,8 @@ function App() {
                                             tickerValue={tickerValue}
                                             tickerCompareValue={tickerCompareValue}
                                             setTickerValue={setTickerValue}
+                                            setTickerCompany1={setTickerCompany1}
+                                            setTickerCompany2={setTickerCompany2}
                                             setTickerCompareValue={setTickerCompareValue}
                                             getStockInfo={getStockInfo}
                                             openComparer={openComparer}
@@ -309,11 +321,13 @@ function App() {
                                             />
                            
                         
-                                            {stock == null
+                                            {(stock == null) || openComparer && (stockCompare == null)
                                                 ? null
                                                 : <TrackerGraph
                                                     tickerValue={tickerValue}
                                                     tickerCompareValue={tickerCompareValue}
+                                                    tickerCompany1={tickerCompany1}
+                                                    tickerCompany2={tickerCompany2}
                                                     stock={stock}
                                                     stockCompare={stockCompare}
                                                     openComparer={openComparer}
