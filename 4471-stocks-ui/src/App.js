@@ -94,7 +94,6 @@ function App() {
     }, []);
 
     const getStockInfo = (stock, start, end) => {
-        console.log(stock)
         setLoading(true)
         let startDate = start != '' ? start.replace(/\//g, "") : null
         let endDate = end != '' ? end.replace(/\//g, "") : null
@@ -114,7 +113,6 @@ function App() {
         ws.send(JSON.stringify(body))
         ws.onmessage = (evt) => {
             let message = JSON.parse(evt.data)
-            console.log(message)
             if (message.channel == channel[1]) {
                 setStock(message)
                 setStart(startDate)
@@ -151,11 +149,9 @@ function App() {
 
     const getWatchlist = () => {
         let body = { channel: channel[4], message: { username: localStorage.getItem("username"), password: localStorage.getItem("password"), type: 'get' } }
-        console.log(body)
         ws.send(JSON.stringify(body))
         ws.onmessage = (evt) => {
             let message = JSON.parse(evt.data)
-            console.log(message)
             setWatchlist(message.message)
 
         };
@@ -180,7 +176,6 @@ function App() {
 
     const removeFromWatchlist = (delStock) => {
         if (watchlist.includes(delStock)) {
-            console.log(delStock)
             let body
             body = {
                 channel: channel[4],
@@ -190,7 +185,6 @@ function App() {
             ws.onmessage = (evt) => {
                 let message = JSON.parse(evt.data)
                 let list = (message.message != [] || message.message != "") ? message.message.split(',') : []
-                console.log(message)
                 setWatchlist(list)
                 //ws.close()
             };
@@ -207,7 +201,6 @@ function App() {
         ws.send(JSON.stringify(body))
         ws.onmessage = (evt) => {
             let message = JSON.parse(evt.data)
-            console.log(message)
             if (message.channel == channel[3]) {
                 setLogin(message.message.loginSuccess)
                 setUsername(body.message.username)
@@ -232,7 +225,6 @@ function App() {
         ws.send(JSON.stringify(body))
         ws.onmessage = (evt) => {
             let message = JSON.parse(evt.data)
-            console.log(message)
             if (message.channel == channel[3]) {
                 setLogin(message.message.loginSuccess)
                 document.getElementById("login-message").innerHTML = message.message.loginMessage
