@@ -18,6 +18,8 @@ function App() {
 
     const [tickers, setTickers] = useState(null)
     const [tickerValue, setTickerValue] = useState(null)
+    const [tickerCompany1, setTickerCompany1] = useState(null)
+    const [tickerCompany2, setTickerCompany2] = useState(null)
     const [tickerCompareValue, setTickerCompareValue] = useState(null)
 
     const [stock, setStock] = useState(null)
@@ -140,6 +142,8 @@ function App() {
         setOpenTracker(true);
         setOpenWatchlist(false);
         setTickerValue(stock)
+        var index = tickers.symbols.indexOf(stock)
+        setTickerCompany1(tickers.names[index])
         
         getStockInfo(stock, "20110113", "20111207")
 
@@ -185,7 +189,7 @@ function App() {
             ws.send(JSON.stringify(body))
             ws.onmessage = (evt) => {
                 let message = JSON.parse(evt.data)
-                let list = message.message == [] ? message.message.split(',') : ""
+                let list = (message.message != [] || message.message != "") ? message.message.split(',') : []
                 console.log(message)
                 setWatchlist(list)
                 //ws.close()
@@ -300,6 +304,8 @@ function App() {
                                             tickerValue={tickerValue}
                                             tickerCompareValue={tickerCompareValue}
                                             setTickerValue={setTickerValue}
+                                            setTickerCompany1={setTickerCompany1}
+                                            setTickerCompany2={setTickerCompany2}
                                             setTickerCompareValue={setTickerCompareValue}
                                             getStockInfo={getStockInfo}
                                             openComparer={openComparer}
@@ -310,11 +316,13 @@ function App() {
                                             />
                            
                         
-                                            {stock == null
+                                            {(stock == null) || openComparer && (stockCompare == null)
                                                 ? null
                                                 : <TrackerGraph
                                                     tickerValue={tickerValue}
                                                     tickerCompareValue={tickerCompareValue}
+                                                    tickerCompany1={tickerCompany1}
+                                                    tickerCompany2={tickerCompany2}
                                                     stock={stock}
                                                     stockCompare={stockCompare}
                                                     openComparer={openComparer}
